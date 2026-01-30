@@ -683,8 +683,9 @@ class PPTXService:
             # Create error slide
             try:
                 self._create_error_slide(slide_data, str(e))
-            except:
+            except Exception as e2:
                 # Last resort: blank slide with error text
+                logger.error(f"   ❌ Error slide creation failed: {e2}", exc_info=True)
                 slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
                 error_box = slide.shapes.add_textbox(
                     Inches(2), Inches(3),
@@ -1080,8 +1081,10 @@ class PPTXService:
             line = line.strip()
             if not line:
                 continue
-            # Remove markdown/numbering
-            line = line.lstrip('0123456789.-*# ')
+            # Remove common prefixes (numbers, bullets, markdown)
+            # Use regex for more precise prefix removal
+            import re
+            line = re.sub(r'^[\d\.\-\*#\s]+', '', line).strip()
             if line:
                 items.append(line)
         
@@ -1126,7 +1129,8 @@ class PPTXService:
                 connector.line.width = Pt(4)
                 logger.info("✅ Vertical line drawn")
             except Exception as e:
-                logger.error(f"❌ Line drawing failed: {e}")
+                # Continue without connecting line - circles will still be visible
+                logger.warning(f"⚠️ Line drawing failed, continuing without connector: {e}")
         
         # Draw CIRCLES and TEXT
         for i, item in enumerate(items):
@@ -1171,8 +1175,12 @@ class PPTXService:
         logger.info(f"✅ Roadmap slide completed with {num_items} items")
     
     # ==========================================
-    # LAYOUT 5: TIMELINE SLIDE
+    # LAYOUT 5: TIMELINE SLIDE (LEGACY)
     # ==========================================
+    # NOTE: This method is kept for backward compatibility but is no longer
+    # called by the layout router. The 'timeline' layout now routes to
+    # _create_roadmap_slide() for consistency. This method may be removed
+    # in a future version if no legacy code depends on it.
     def _create_timeline_slide(self, data: Dict, theme: Dict):
         """Create vertical timeline"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
