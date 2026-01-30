@@ -1,0 +1,92 @@
+2026-01-30 01:00:05,988 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.121.104.152:5000
+2026-01-30 01:00:05,989 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-01-30 01:00:06,004 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-01-30 01:00:07,053 - werkzeug - WARNING -  * Debugger is active!
+2026-01-30 01:00:07,057 - werkzeug - INFO -  * Debugger PIN: 757-214-264
+2026-01-30 01:00:15,181 - werkzeug - INFO -  * Detected change in 'C:\\Users\\POOJA GUPTA\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\logging\\__init__.py', reloading
+2026-01-30 01:00:15,380 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:15,541 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-01-30 01:00:16,716 - werkzeug - WARNING -  * Debugger is active!
+2026-01-30 01:00:16,721 - werkzeug - INFO -  * Debugger PIN: 757-214-264
+2026-01-30 01:00:16,794 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:16,796 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:16,813 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:00:17,429 - werkzeug - INFO -  * Detected change in 'C:\\Users\\POOJA GUPTA\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\pptx\\parts\\image.py', reloading
+2026-01-30 01:00:17,456 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:00:17,881 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-01-30 01:00:19,018 - werkzeug - WARNING -  * Debugger is active!
+2026-01-30 01:00:19,022 - werkzeug - INFO -  * Debugger PIN: 757-214-264
+2026-01-30 01:00:19,094 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:19,097 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:19,112 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:00:19,249 - werkzeug - INFO - 127.0.0.1 - - [30/Jan/2026 01:00:19] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2026-01-30 01:00:19,491 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:00:20,381 - app.services.pptx_service - INFO -    Title: Key Traditions and Celebrations
+2026-01-30 01:00:20,895 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:20,897 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:20,929 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:00:21,350 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:00:21,627 - app.services.pptx_service - INFO -    Title: Key Traditions and Celebrations
+2026-01-30 01:00:22,791 - app.services.pptx_service - INFO -    Title: Cultural Significance
+2026-01-30 01:00:22,811 - app.services.pptx_service - INFO -    Title: Importance of Republic Day
+2026-01-30 01:00:24,455 - app.services.pptx_service - INFO -    Title: Cultural Significance
+2026-01-30 01:00:24,479 - app.services.pptx_service - INFO -    Title: Importance of Republic Day
+2026-01-30 01:00:24,792 - app.services.pptx_service - INFO -    Title: Process/Roadmap
+2026-01-30 01:00:24,840 - werkzeug - INFO -  * Detected change in 'C:\\Users\\POOJA GUPTA\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\enum.py', reloading
+2026-01-30 01:00:24,878 - app.services.pptx_service - INFO -    Title: Global Recognition
+2026-01-30 01:00:25,316 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-01-30 01:00:26,337 - werkzeug - WARNING -  * Debugger is active!
+2026-01-30 01:00:26,344 - werkzeug - INFO -  * Debugger PIN: 757-214-264
+2026-01-30 01:00:26,428 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:26,430 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:26,446 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:00:26,800 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:00:27,205 - app.services.pptx_service - INFO -    Title: Key Traditions and Celebrations
+2026-01-30 01:00:29,883 - app.services.pptx_service - INFO -    Title: Cultural Significance
+2026-01-30 01:00:29,910 - app.services.pptx_service - INFO -    Title: Importance of Republic Day
+2026-01-30 01:00:32,347 - app.services.pptx_service - INFO -    Title: Process/Roadmap
+2026-01-30 01:00:32,366 - app.services.pptx_service - INFO -    Title: Global Recognition
+2026-01-30 01:00:33,105 - app.services.pptx_service - INFO -    Title: Conclusion
+2026-01-30 01:00:33,383 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:33,391 - app.services.pptx_service - INFO - ================================================================================
+
+2026-01-30 01:00:33,397 - werkzeug - INFO - 127.0.0.1 - - [30/Jan/2026 01:00:33] "GET /api/presentations/231/download/pptx HTTP/1.1" 200 -
+2026-01-30 01:00:38,449 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:00:38,451 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:38,480 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:00:38,910 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:00:39,149 - app.services.pptx_service - INFO -    Title: Key Traditions and Celebrations
+2026-01-30 01:00:41,350 - app.services.pptx_service - INFO -    Title: Cultural Significance
+2026-01-30 01:00:41,377 - app.services.pptx_service - INFO -    Title: Importance of Republic Day
+2026-01-30 01:00:44,328 - app.services.pptx_service - INFO -    Title: Process/Roadmap
+2026-01-30 01:00:44,347 - app.services.pptx_service - INFO -    Title: Global Recognition
+2026-01-30 01:00:45,255 - app.services.pptx_service - INFO -    Title: Conclusion
+2026-01-30 01:00:45,545 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:00:45,550 - app.services.pptx_service - INFO - ================================================================================
+
+2026-01-30 01:00:45,558 - werkzeug - INFO - 127.0.0.1 - - [30/Jan/2026 01:00:45] "GET /api/presentations/231/download/pptx HTTP/1.1" 200 -
+2026-01-30 01:00:58,132 - werkzeug - INFO - 127.0.0.1 - - [30/Jan/2026 01:00:58] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+2026-01-30 01:01:02,200 - app.services.pptx_service - INFO - 
+================================================================================
+2026-01-30 01:01:02,208 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:01:02,241 - app.services.pptx_service - INFO -    Title: Introduction to Republic Day in India
+2026-01-30 01:01:02,494 - app.services.pptx_service - INFO -    Title: Deep Dive
+2026-01-30 01:01:02,780 - app.services.pptx_service - INFO -    Title: Key Traditions and Celebrations
+2026-01-30 01:01:05,117 - app.services.pptx_service - INFO -    Title: Cultural Significance
+2026-01-30 01:01:05,140 - app.services.pptx_service - INFO -    Title: Importance of Republic Day
+2026-01-30 01:01:08,092 - app.services.pptx_service - INFO -    Title: Process/Roadmap
+2026-01-30 01:01:08,108 - app.services.pptx_service - INFO -    Title: Global Recognition
+2026-01-30 01:01:08,959 - app.services.pptx_service - INFO -    Title: Conclusion
+2026-01-30 01:01:09,168 - app.services.pptx_service - INFO - ================================================================================
+2026-01-30 01:01:09,172 - app.services.pptx_service - INFO - ================================================================================
+
+2026-01-30 01:01:09,178 - werkzeug - INFO - 127.0.0.1 - - [30/Jan/2026 01:01:09] "GET /api/presentations/231/download/pptx HTTP/1.1" 200 -

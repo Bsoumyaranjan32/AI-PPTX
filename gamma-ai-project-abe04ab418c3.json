@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "gamma-ai-project",
+  "private_key_id": "abe04ab418c3e7361d477ea41b46f4fb1db4d415",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC3P/q9CfV7VX3A\n5F/yUreg/13NftE5l8jACfrs9YJqpeUWRXliwq6GCStf3JQb1WUEgrnVWCRewXHB\n2DHM9j28PhFEB3XiT6rTzWr5sBlGndJ8/fneGElFGbAj4Klnf6axluUolugeQwzM\nCJEAUkn8h8hdNOmPQf82VrLLfGlStku99IRynUQDk35ndcpWlhsggrx3l2Yk/ug6\nou+DtoroJZc71irklEKcG1O2ZcvyVqY1z8o0lJ4GcUL1lkIgIXiwjKYEyZL29DCb\n8uBKYDPJ3uDTf9t/0VZWpyWZzFgSDw8v6r+2SlOhrUzhzroGXwWRTjij6fUJmvOK\nx+6tgqqFAgMBAAECgf8jA9alcyxfpLZNZVXwDQjez+zcl0mN97LO/xkzWLYoKrWG\nIUBQiWKlD0YlIGuB5gSnbVM/sNfs7d8OwIDDk/RimSQzcOQq744faoubqkp/c9NZ\n5C3FLQl9wAAoMDAugUsYzqclr7Aqws/EgjPdcTEx+mq5ZKLm/MqyAgmoAt3H2o8I\n8p+RvhBDqWn3g0RN+6OxrpY/iY3ZemIm8seU/g8Ek8H8XvusQrpwVB7Ht+z07bWa\nQos/41V4TDwJOVMF8MVcf4uAwJJdRkmBE6oWVCXO+aWXqOBm9NgVTz8imTRzUiOk\nUiSuPblj2maIJ4GGrWVm82Mf4d3Ut+e4N13y5BkCgYEA/IpNFBumZKzLXXWMCql7\nQCjsw6lVAf3mKvG7xHZDcowAxcssj/lwiusWyBOe54daFBE4KqENtMrh8MzSypbd\nxA1OaWtMf8yGWIEtxnscqwv1wMHIoMvvjR2U86dkj9pPkBSZ3ch/d1OFRXS9Khuv\njGBrNOyeAbdIq5qHLBjMwikCgYEAucKqiRvrRjogmYMWUWwf8gbpi0Ua3fwwYQTg\njCXBu2nTIVsOEw5/YgqPW4e1rdvU4xj6SnvljDYS1I4o8Mqasp83v91Gmw9ScsZw\ne/MPtx/UbOhs0NbF5O1BUFQIrHyFBg+/6HZ3MDmwwdA3Tm1u5j12pt2SpeKq4qXp\n9L4ZiP0CgYEA6u8eVZ6DZRT6+67m4ORaLI3l9QAKfRfekATiURpUFLP55AfnJOlA\nsXuSbf8SzQE144VBYycAwTgciQ+C6cT/+esHDzsqp5l1QdCq7QKK4PT3YqLkKfKO\noBDtCN6oxsqpSbhgi9qB+lhQmxTHBe1LmqP4F/wn4iDIEhxns7Y+hkECgYBp2KlR\njO4HyxFOR6qM5J5jS1sB93Nyr8NlVOEaGl2Ei605IWgopach10COeAqmsU9hw5bC\noExRE3KxWPutENULGLwsgEo+CoIBUl8/0WTQBLwG/n0alnaWljYULn3uwtkNdiX0\nsKQDf6vfE+SftK1vVfBo7nIkQb77fGyN/1APhQKBgQDYvEBe0xrzTH5n6Siy+JGX\nFIaFTEmYXwoh6MNnFB8xZ2h/MaUiuPaKaUv1BmTVGd8RHnPEa3h2vez4Ykf9eKFf\nZT64S/8CBY9idMZ5YggjhtHxrS1jpAh9z364M3CHaBO101rB1cdLoItgzPH+kPnN\nReBWJtRDSd0+h+vcwgDtfg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "gamma-ai-storage-user@gamma-ai-project.iam.gserviceaccount.com",
+  "client_id": "106991272365753017213",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gamma-ai-storage-user%40gamma-ai-project.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

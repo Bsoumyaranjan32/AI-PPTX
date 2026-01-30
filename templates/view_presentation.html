@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamma Pro Editor - With Graphs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        
+        .editable-active { border: 2px dashed #6366f1; padding: 4px; background: rgba(99, 102, 241, 0.05); outline: none; }
+        
+        .image-overlay { opacity: 0; transition: opacity 0.2s; background: rgba(0,0,0,0.5); pointer-events: none; }
+        .group:hover .image-overlay.visible { opacity: 1; pointer-events: auto; }
+        
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6366f1; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            
+            <div class="flex items-center gap-4 flex-1">
+                <a href="/dashboard" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 id="pres-title" class="font-bold text-lg text-slate-900">Loading...</h1>
+                    <p class="text-xs text-slate-500"><span id="slide-count">0</span> Slides</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="addGraphSlide()" class="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 rounded-lg text-sm font-bold transition">
+                    <i class="ph-bold ph-chart-bar"></i> Add Graph
+                </button>
+
+                <button id="edit-btn" onclick="toggleEditMode()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-sm font-bold text-slate-700 transition">
+                    <i class="ph-bold ph-pencil-simple"></i> <span id="edit-text">Edit</span>
+                </button>
+
+                <button id="save-btn" onclick="saveChanges()" class="hidden flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold shadow-lg">
+                    <i class="ph-bold ph-floppy-disk"></i> Save
+                </button>
+
+                <button onclick="exportPPTX()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow-sm">
+                    <i class="ph-bold ph-download-simple"></i> Export
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-10" id="main-container">
+        <div id="loader" class="loader"></div>
+        <div id="slides-wrapper" class="space-y-12 hidden"></div>
+    </main>
+
+    <script>
+        const pathSegments = window.location.pathname.split('/');
+        const presId = pathSegments[pathSegments.length - 1] || pathSegments[pathSegments.length - 2]; 
+        let isEditMode = false;
+
+        document.addEventListener('DOMContentLoaded', loadPresentation);
+
+        async function loadPresentation() {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const res = await fetch(`/api/presentations/${presId}`, { headers });
+                const data = await res.json();
+
+                if (data.success) {
+                    const pres = data.presentation;
+                    document.title = pres.title + " - Editor";
+                    document.getElementById('pres-title').innerText = pres.title;
+                    document.getElementById('slide-count').innerText = pres.slides.length;
+                    renderSlides(pres.slides);
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('slides-wrapper').classList.remove('hidden');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderSlides(slides) {
+            const container = document.getElementById('slides-wrapper');
+            container.innerHTML = '';
+            slides.forEach((slide, index) => {
+                const slideHTML = `
+                <div class="slide-card bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[400px] group relative" data-index="${index}">
+                    <div class="w-full md:w-1/2 relative bg-slate-100 image-section group flex items-center justify-center p-4">
+                        <img src="${slide.image || ''}" class="w-full h-full object-contain slide-img rounded-lg shadow-sm" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div class="hidden absolute inset-0 flex-col items-center justify-center text-slate-400 fallback-img">
+                            <i class="ph-duotone ph-image text-4xl"></i><span class="text-sm">No Image</span>
+                        </div>
+                        <div class="image-overlay absolute inset-0 flex items-center justify-center">
+                            <button onclick="changeImage(this)" class="bg-white text-indigo-600 px-4 py-2 rounded-full font-bold shadow-xl hover:bg-indigo-50">
+                                <i class="ph-bold ph-magic-wand"></i> Change Image
+                            </button>
+                        </div>
+                        <div class="absolute top-4 left-4 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur">${index + 1}</div>
+                    </div>
+                    <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+                        <h2 class="slide-title text-2xl font-bold text-slate-900 mb-4 outline-none">${slide.title}</h2>
+                        <div class="slide-content text-slate-600 space-y-2 outline-none">${formatContent(slide.content)}</div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', slideHTML);
+            });
+        }
+
+        function formatContent(text) {
+            if (!text) return '';
+            return text.split('\n').map(line => `<p class="editable-line">${line.replace(/[*#]/g, '')}</p>`).join('');
+        }
+
+        // ==========================================
+        // 📊 GRAPH GENERATOR LOGIC
+        // ==========================================
+        async function addGraphSlide() {
+            const topic1 = prompt("Enter Topic 1 (e.g. World War 1):");
+            if (!topic1) return;
+            const topic2 = prompt("Enter Topic 2 (e.g. World War 2):");
+            if (!topic2) return;
+
+            const btn = document.querySelector('button[onclick="addGraphSlide()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Generating Graph...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/presentations/generate_graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic1, topic2 })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Create a hidden canvas to draw the chart
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 800;
+                    canvas.height = 600;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Draw White Background
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, 800, 600);
+
+                    // Generate Chart using Chart.js logic
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.data.labels,
+                            datasets: [
+                                { label: data.data.dataset1.label, data: data.data.dataset1.data, backgroundColor: 'rgba(99, 102, 241, 0.7)' },
+                                { label: data.data.dataset2.label, data: data.data.dataset2.data, backgroundColor: 'rgba(236, 72, 153, 0.7)' }
+                            ]
+                        },
+                        options: {
+                            responsive: false,
+                            animation: false, // Turn off animation for instant image capture
+                            plugins: {
+                                title: { display: true, text: `${topic1} vs ${topic2}`, font: { size: 24 } },
+                                legend: { labels: { font: { size: 18 } } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { font: { size: 14 } } },
+                                x: { ticks: { font: { size: 14 } } }
+                            }
+                        }
+                    });
+
+                    // Wait slightly for chart to render then convert to Image
+                    setTimeout(() => {
+                        const imageUrl = canvas.toDataURL('image/jpeg');
+                        
+                        // Add new slide to DOM
+                        const newSlide = {
+                            title: `Comparison: ${topic1} vs ${topic2}`,
+                            content: `Analysis of key metrics between ${topic1} and ${topic2}.\nData generated by AI based on historical records.`,
+                            image: imageUrl // The chart IS the image
+                        };
+                        
+                        // Save immediately to persist
+                        addSlideToUI(newSlide);
+                        saveChanges();
+                        
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        alert("Graph created successfully!");
+                    }, 500);
+
+                } else {
+                    alert("AI failed to generate graph data.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error generating graph.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function addSlideToUI(slide) {
+            const container = document.getElementById('slides-wrapper');
+            const index = container.children.length;
+            const slideHTML = `
+            <div class="slide-card bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[400px] group relative" data-index="${index}">
+                <div class="w-full md:w-1/2 relative bg-slate-100 image-section group flex items-center justify-center p-4">
+                    <img src="${slide.image}" class="w-full h-full object-contain slide-img rounded-lg shadow-sm">
+                    <div class="absolute top-4 left-4 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur">${index + 1}</div>
+                </div>
+                <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+                    <h2 class="slide-title text-2xl font-bold text-slate-900 mb-4 outline-none">${slide.title}</h2>
+                    <div class="slide-content text-slate-600 space-y-2 outline-none">${formatContent(slide.content)}</div>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', slideHTML);
+            // Scroll to new slide
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ... [Existing toggleEditMode, changeImage, saveChanges, exportPPTX functions] ...
+        
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('edit-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const text = document.getElementById('edit-text');
+            
+            if (isEditMode) {
+                text.innerText = 'Cancel';
+                btn.classList.add('bg-slate-100');
+                saveBtn.classList.remove('hidden');
+                document.querySelectorAll('.slide-title, .slide-content').forEach(el => el.contentEditable = "true");
+                document.querySelectorAll('.image-overlay').forEach(el => el.classList.add('visible'));
+            } else {
+                text.innerText = 'Edit';
+                btn.classList.remove('bg-slate-100');
+                saveBtn.classList.add('hidden');
+                document.querySelectorAll('.slide-title, .slide-content').forEach(el => el.contentEditable = "false");
+                document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('visible'));
+            }
+        }
+
+        function changeImage(btn) {
+            const prompt = window.prompt("Enter image description:");
+            if(!prompt) return;
+            const img = btn.closest('.image-section').querySelector('.slide-img');
+            btn.innerHTML = 'Generating...';
+            const newUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&nologo=true&t=${Date.now()}`;
+            const temp = new Image();
+            temp.src = newUrl;
+            temp.onload = () => { img.src = newUrl; img.style.display = 'block'; btn.innerHTML = 'Change Image'; };
+        }
+
+        async function saveChanges() {
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerHTML = 'Saving...';
+            const newSlides = [];
+            document.querySelectorAll('.slide-card').forEach(card => {
+                const title = card.querySelector('.slide-title').innerText;
+                const img = card.querySelector('.slide-img').src;
+                let content = card.querySelector('.slide-content').innerText;
+                newSlides.push({ title: title.trim(), content: content.trim(), image: img });
+            });
+
+            try {
+                const token = localStorage.getItem('token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                const res = await fetch(`/api/presentations/${presId}`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify({ slides: newSlides })
+                });
+                if(res.ok) { saveBtn.innerHTML = 'Saved!'; setTimeout(() => { toggleEditMode(); saveBtn.innerHTML = 'Save'; }, 1000); }
+                else alert("Save failed.");
+            } catch(e) { alert("Error saving"); }
+        }
+
+        function exportPPTX() { window.location.href = `/api/presentations/${presId}/download/pptx`; }
+    </script>
+</body>
+</html>
