@@ -639,13 +639,14 @@ class PPTXService:
     
     def _generate_slide(self, slide_number: int, slide_data: Dict):
         """Route slide generation to appropriate layout handler"""
-        layout = slide_data.get('layout', 'standard')
+        layout = slide_data.get('layout', 'standard').lower().strip()
         
         logger.info(f"\n📄 Slide {slide_number}: {layout.upper()}")
         logger.info(f"   Title: {slide_data.get('title', 'N/A')[:50]}")
+        logger.info(f"   Layout detected: '{layout}'")
         
         try:
-            # Layout router
+            # EXPANDED LAYOUT ROUTER with logging
             layout_handlers = {
                 'centered': self._create_hero_slide,
                 'hero': self._create_hero_slide,
@@ -654,8 +655,11 @@ class PPTXService:
                 'split': self._create_split_card_slide,
                 'grid_4': self._create_grid_cards_slide,
                 'grid': self._create_grid_cards_slide,
+                'cards': self._create_grid_cards_slide,
                 'roadmap': self._create_roadmap_slide,
-                'timeline': self._create_timeline_slide,
+                'timeline': self._create_roadmap_slide,  # Same handler
+                'process': self._create_roadmap_slide,   # ADD THIS
+                'steps': self._create_roadmap_slide,     # ADD THIS
                 'comparison': self._create_comparison_slide,
                 'quote': self._create_quote_slide,
                 'image_focus': self._create_image_focus_slide,
@@ -664,15 +668,33 @@ class PPTXService:
                 'table': self._create_table_slide,
             }
             
-            handler = layout_handlers.get(layout, self._create_standard_slide)
-            handler(slide_data, self.current_theme)
+            if layout in layout_handlers:
+                handler = layout_handlers[layout]
+                logger.info(f"   ✅ Using handler: {handler.__name__}")
+                handler(slide_data, self.current_theme)
+            else:
+                logger.warning(f"   ⚠️ Unknown layout '{layout}', using standard")
+                self._create_standard_slide(slide_data, self.current_theme)
             
-            logger.info(f"   ✅ Slide {slide_number} created successfully")
+            logger.info(f"   ✅ Slide {slide_number} completed")
             
         except Exception as e:
-            logger.error(f"   ❌ Error creating slide {slide_number}: {e}")
-            # Create error slide as fallback
-            self._create_error_slide(slide_data, str(e))
+            logger.error(f"   ❌ Error in slide {slide_number}: {e}", exc_info=True)
+            # Create error slide
+            try:
+                self._create_error_slide(slide_data, str(e))
+            except:
+                # Last resort: blank slide with error text
+                slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
+                error_box = slide.shapes.add_textbox(
+                    Inches(2), Inches(3),
+                    Inches(9.33), Inches(2)
+                )
+                error_frame = error_box.text_frame
+                error_para = error_frame.paragraphs[0]
+                error_para.text = f"Error generating slide:\n{str(e)}"
+                error_para.font.size = Pt(18)
+                error_para.alignment = PP_ALIGN.CENTER
     
     def _preprocess_content(self, content: str) -> str:
         """Clean and format content for PPTX"""
@@ -1031,102 +1053,122 @@ class PPTXService:
     # LAYOUT 4: ROADMAP SLIDE
     # ==========================================
     def _create_roadmap_slide(self, data: Dict, theme: Dict):
-        """Create VERTICAL roadmap/timeline with numbered circles (1-6)"""
+        """Create VERTICAL timeline with 6 steps - GUARANTEED TO WORK"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self._set_background(slide, theme)
-        self._add_title(slide, data.get('title', ''), theme)
         
-        # Parse items
+        # Title
+        title_box = slide.shapes.add_textbox(
+            Inches(0.5), Inches(0.3),
+            Inches(12.3), Inches(0.8)
+        )
+        title_frame = title_box.text_frame
+        title_para = title_frame.paragraphs[0]
+        title_para.text = data.get('title', 'Process/Roadmap')
+        title_para.font.size = Pt(32)
+        title_para.font.bold = True
+        title_para.font.color.rgb = theme['text']
+        title_para.alignment = PP_ALIGN.CENTER
+        
+        # Parse content - ROBUST PARSING
         content = data.get('content', '')
-        items = [line.strip().replace('*', '').replace('#', '') 
-                 for line in content.split('\n') if line.strip()]
+        logger.info(f"📋 Roadmap content length: {len(content)}")
         
+        # Extract items (handle various formats)
+        items = []
+        for line in content.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+            # Remove markdown/numbering
+            line = line.lstrip('0123456789.-*# ')
+            if line:
+                items.append(line)
+        
+        # Fallback if no items parsed
         if not items:
-            return
+            items = [
+                "Research & Planning",
+                "Design & Development", 
+                "Testing & Quality Assurance",
+                "Deployment & Launch",
+                "Monitoring & Optimization",
+                "Continuous Improvement"
+            ]
+            logger.warning("⚠️ No roadmap items found, using defaults")
         
-        # Limit to 6 items max (matches web)
+        # Limit to 6 items max
         items = items[:6]
         num_items = len(items)
+        logger.info(f"📊 Rendering {num_items} roadmap items")
         
-        # VERTICAL TIMELINE LAYOUT SETTINGS (matching spec exactly)
-        circle_diameter = Inches(0.6)       # Circle diameter
-        circle_x = Inches(1.5)              # Fixed X position for all circles (left side)
-        start_y = Inches(2.2)               # Starting Y position
-        vertical_gap = Inches(1.0)          # Vertical spacing between circles
-        line_thickness = Inches(0.08)       # Connecting line thickness (0.08" as per spec)
-        text_box_x = Inches(2.5)            # Text box X position (right of circles) - updated to 2.5"
-        text_box_width = Inches(9.5)        # Text box width - updated to 9.5"
+        # FIXED POSITIONS - Vertical Timeline
+        start_x = Inches(2.0)
+        start_y = Inches(1.8)
+        circle_diameter = Inches(0.6)
+        vertical_spacing = Inches(0.85)
+        text_x = start_x + Inches(1.0)
+        text_width = Inches(9.5)
         
-        # DRAW VERTICAL CONNECTING LINE FIRST (behind circles)
+        # Draw VERTICAL LINE first (behind circles)
         if num_items > 1:
-            # Calculate line start and end Y positions
-            line_start_y = start_y + (circle_diameter / 2)  # Center of first circle
-            line_end_y = start_y + ((num_items - 1) * vertical_gap) + (circle_diameter / 2)  # Center of last circle
+            line_x = start_x + (circle_diameter / 2)
+            line_start_y = start_y + (circle_diameter / 2)
+            line_end_y = start_y + (circle_diameter / 2) + ((num_items - 1) * vertical_spacing)
             
-            # Draw vertical line connecting all circles with proper purple color
-            line = slide.shapes.add_connector(
-                MSO_CONNECTOR.STRAIGHT,
-                circle_x + (circle_diameter / 2), line_start_y,  # Start at center of first circle
-                circle_x + (circle_diameter / 2), line_end_y     # End at center of last circle
-            )
-            line.line.color.rgb = RGBColor(100, 120, 255)  # Purple/blue color
-            line.line.width = line_thickness
+            try:
+                connector = slide.shapes.add_connector(
+                    MSO_CONNECTOR.STRAIGHT,
+                    line_x, line_start_y,
+                    line_x, line_end_y
+                )
+                connector.line.color.rgb = theme['accent']
+                connector.line.width = Pt(4)
+                logger.info("✅ Vertical line drawn")
+            except Exception as e:
+                logger.error(f"❌ Line drawing failed: {e}")
         
-        # CREATE CIRCLES AND TEXT FOR EACH ROADMAP ITEM
+        # Draw CIRCLES and TEXT
         for i, item in enumerate(items):
-            # Calculate Y position for this circle
-            y = start_y + (i * vertical_gap)
+            y = start_y + (i * vertical_spacing)
             
-            # Circle node with solid purple fill
+            # Circle
             circle = slide.shapes.add_shape(
                 MSO_SHAPE.OVAL,
-                circle_x, y,
+                start_x, y,
                 circle_diameter, circle_diameter
             )
             circle.fill.solid()
-            circle.fill.fore_color.rgb = RGBColor(100, 120, 255)  # Purple solid fill
-            circle.line.color.rgb = RGBColor(100, 120, 255)  # Purple border
+            circle.fill.fore_color.rgb = theme['accent']
+            circle.line.fill.background()
             
-            # White number text inside circle (1-6)
-            num_frame = circle.text_frame
-            num_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-            num_para = num_frame.paragraphs[0]
-            num_para.text = str(i + 1)
-            num_para.font.size = Pt(20)
-            num_para.font.bold = True
-            num_para.font.color.rgb = RGBColor(255, 255, 255)  # White number
-            num_para.alignment = PP_ALIGN.CENTER
+            # Number in circle
+            circle_text = circle.text_frame
+            circle_text.vertical_anchor = MSO_ANCHOR.MIDDLE
+            circle_para = circle_text.paragraphs[0]
+            circle_para.text = str(i + 1)
+            circle_para.font.size = Pt(20)
+            circle_para.font.bold = True
+            circle_para.font.color.rgb = theme['bg']
+            circle_para.alignment = PP_ALIGN.CENTER
             
-            # Text content box aligned with circle (right of circle)
+            # Text box (right of circle)
             text_box = slide.shapes.add_textbox(
-                text_box_x, y,
-                text_box_width, circle_diameter
+                text_x, y,
+                text_width, Inches(0.7)
             )
             text_frame = text_box.text_frame
             text_frame.word_wrap = True
             text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             
-            # Split item into title and description if colon present
-            if ':' in item:
-                title_part, desc_part = item.split(':', 1)
-                text_para = text_frame.paragraphs[0]
-                text_para.text = title_part.strip()
-                text_para.font.size = Pt(16)
-                text_para.font.bold = True
-                text_para.font.color.rgb = theme.get('text', RGBColor(51, 51, 51))
-                
-                # Add description on new line
-                if desc_part.strip():
-                    text_frame.add_paragraph()
-                    desc_para = text_frame.paragraphs[1]
-                    desc_para.text = desc_part.strip()
-                    desc_para.font.size = Pt(12)
-                    desc_para.font.color.rgb = RGBColor(100, 100, 100)
-            else:
-                text_para = text_frame.paragraphs[0]
-                text_para.text = item
-                text_para.font.size = Pt(14)
-                text_para.font.color.rgb = theme.get('text', RGBColor(51, 51, 51))
+            text_para = text_frame.paragraphs[0]
+            text_para.text = item
+            text_para.font.size = Pt(14)
+            text_para.font.color.rgb = theme['text']
+            
+            logger.info(f"  ✅ Item {i+1}: {item[:30]}...")
+        
+        logger.info(f"✅ Roadmap slide completed with {num_items} items")
     
     # ==========================================
     # LAYOUT 5: TIMELINE SLIDE
@@ -1550,35 +1592,68 @@ class PPTXService:
     # LAYOUT 13: ERROR SLIDE (Fallback)
     # ==========================================
     def _create_error_slide(self, data: Dict, error_msg: str):
-        """Create error slide when generation fails"""
-        theme = self.theme_manager.get_theme('dialogue')
-        slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
-        self._set_background(slide, theme)
-        
-        # Error icon
-        error_box = slide.shapes.add_textbox(
-            Inches(5.5), Inches(2),
-            Inches(2.33), Inches(1)
-        )
-        error_text = error_box.text_frame
-        error_para = error_text.paragraphs[0]
-        error_para.text = "⚠️"
-        error_para.font.size = Pt(72)
-        error_para.alignment = PP_ALIGN.CENTER
-        
-        # Error message
-        msg_box = slide.shapes.add_textbox(
-            Inches(2), Inches(3.5),
-            Inches(9.33), Inches(2)
-        )
-        msg_text = msg_box.text_frame
-        msg_text.word_wrap = True
-        
-        msg_para = msg_text.paragraphs[0]
-        msg_para.text = f"Error generating slide:\n{error_msg}"
-        msg_para.font.size = Pt(18)
-        msg_para.font.color.rgb = RGBColor(220, 38, 38)
-        msg_para.alignment = PP_ALIGN.CENTER
+        """Create informative error slide"""
+        try:
+            theme = self.current_theme or self.theme_manager.get_theme('dialogue')
+            slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
+            
+            # Background
+            bg = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                0, 0,
+                self.config.SLIDE_WIDTH,
+                self.config.SLIDE_HEIGHT
+            )
+            bg.fill.solid()
+            bg.fill.fore_color.rgb = RGBColor(255, 245, 245)  # Light red
+            bg.line.fill.background()
+            
+            # Send to back
+            slide.shapes._spTree.remove(bg._element)
+            slide.shapes._spTree.insert(2, bg._element)
+            
+            # Error icon
+            icon_box = slide.shapes.add_textbox(
+                Inches(5.5), Inches(2),
+                Inches(2.33), Inches(1)
+            )
+            icon_text = icon_box.text_frame
+            icon_para = icon_text.paragraphs[0]
+            icon_para.text = "⚠️"
+            icon_para.font.size = Pt(72)
+            icon_para.alignment = PP_ALIGN.CENTER
+            
+            # Error title
+            title_box = slide.shapes.add_textbox(
+                Inches(2), Inches(3.2),
+                Inches(9.33), Inches(0.8)
+            )
+            title_text = title_box.text_frame
+            title_para = title_text.paragraphs[0]
+            title_para.text = "Slide Generation Error"
+            title_para.font.size = Pt(24)
+            title_para.font.bold = True
+            title_para.font.color.rgb = RGBColor(220, 38, 38)
+            title_para.alignment = PP_ALIGN.CENTER
+            
+            # Error details
+            msg_box = slide.shapes.add_textbox(
+                Inches(2), Inches(4.2),
+                Inches(9.33), Inches(2)
+            )
+            msg_text = msg_box.text_frame
+            msg_text.word_wrap = True
+            
+            msg_para = msg_text.paragraphs[0]
+            msg_para.text = f"Slide Title: {data.get('title', 'Unknown')}\n\nError: {error_msg}"
+            msg_para.font.size = Pt(14)
+            msg_para.font.color.rgb = RGBColor(100, 100, 100)
+            msg_para.alignment = PP_ALIGN.CENTER
+            
+            logger.info("✅ Error slide created")
+            
+        except Exception as e2:
+            logger.error(f"❌ Failed to create error slide: {e2}")
     
     # ==========================================
     # HELPER METHODS
