@@ -223,3 +223,96 @@
 2026-01-30 07:21:58,366 - services.pptx_service - INFO - ================================================================================
 
 2026-01-30 07:21:58,366 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,139 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,139 - services.pptx_service - INFO - 
+================================================================================
+2026-01-30 07:25:09,140 - services.pptx_service - INFO - 🎨 STARTING PRESENTATION GENERATION
+2026-01-30 07:25:09,140 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,145 - services.pptx_service - INFO - 🎨 Theme: Dialogue
+2026-01-30 07:25:09,145 - services.pptx_service - INFO - 📊 Total slides to generate: 1
+2026-01-30 07:25:09,145 - services.pptx_service - INFO - 
+📄 Slide 1: QUOTE
+2026-01-30 07:25:09,145 - services.pptx_service - INFO -    Title: Test Quote
+2026-01-30 07:25:09,148 - services.pptx_service - INFO -    ✅ Slide 1 created successfully
+2026-01-30 07:25:09,154 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,154 - services.pptx_service - INFO - ✅ PRESENTATION GENERATION COMPLETED
+2026-01-30 07:25:09,154 - services.pptx_service - INFO - ================================================================================
+
+2026-01-30 07:25:09,154 - services.pptx_service - INFO - 🔧 Original URL: https://example.com/image with spaces.jpg
+2026-01-30 07:25:09,154 - services.pptx_service - INFO - ✅ Sanitized URL: https://example.com/image%20with%20spaces.jpg
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🔧 Original URL: https://example.com/prompt/test&query=1
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - ✅ Sanitized URL: https://example.com/prompt/test%26query%3D1
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🔧 Original URL: https://example.com/prompt/hello world
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - ✅ Sanitized URL: https://example.com/prompt/hello%20world
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🔧 Original URL: https://example.com/normal.jpg
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - ✅ Sanitized URL: https://example.com/normal.jpg
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 
+================================================================================
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - 🎨 STARTING PRESENTATION GENERATION
+2026-01-30 07:25:09,155 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,159 - services.pptx_service - INFO - 🎨 Theme: Dialogue
+2026-01-30 07:25:09,159 - services.pptx_service - INFO - 📊 Total slides to generate: 1
+2026-01-30 07:25:09,159 - services.pptx_service - INFO - 
+📄 Slide 1: GRID_4
+2026-01-30 07:25:09,159 - services.pptx_service - INFO -    Title: Test Grid
+2026-01-30 07:25:09,167 - services.pptx_service - INFO -    ✅ Slide 1 created successfully
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - ✅ PRESENTATION GENERATION COMPLETED
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - ================================================================================
+
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - 
+================================================================================
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - 🎨 STARTING PRESENTATION GENERATION
+2026-01-30 07:25:09,173 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,177 - services.pptx_service - INFO - 🎨 Theme: Dialogue
+2026-01-30 07:25:09,177 - services.pptx_service - INFO - 📊 Total slides to generate: 1
+2026-01-30 07:25:09,177 - services.pptx_service - INFO - 
+📄 Slide 1: ROADMAP
+2026-01-30 07:25:09,177 - services.pptx_service - INFO -    Title: Test Roadmap
+2026-01-30 07:25:09,178 - services.pptx_service - ERROR -    ❌ Error creating slide 1: type object 'MSO_LINE_DASH_STYLE' has no attribute 'STRAIGHT_CONNECTOR'
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - ✅ PRESENTATION GENERATION COMPLETED
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - ================================================================================
+
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - 🚀 PPTXService initialized
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - 
+================================================================================
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - 🎨 STARTING PRESENTATION GENERATION
+2026-01-30 07:25:09,185 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,189 - services.pptx_service - INFO - 🎨 Theme: Dialogue
+2026-01-30 07:25:09,189 - services.pptx_service - INFO - 📊 Total slides to generate: 1
+2026-01-30 07:25:09,189 - services.pptx_service - INFO - 
+📄 Slide 1: STANDARD
+2026-01-30 07:25:09,189 - services.pptx_service - INFO -    Title: Test Standard
+2026-01-30 07:25:09,191 - services.pptx_service - INFO -    ✅ Slide 1 created successfully
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - ✅ PRESENTATION GENERATION COMPLETED
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - ================================================================================
+
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - 
+================================================================================
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - 🎨 STARTING PRESENTATION GENERATION
+2026-01-30 07:25:09,196 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,200 - services.pptx_service - INFO - 🎨 Theme: Dialogue
+2026-01-30 07:25:09,200 - services.pptx_service - INFO - 📊 Total slides to generate: 1
+2026-01-30 07:25:09,200 - services.pptx_service - INFO - 
+📄 Slide 1: STANDARD
+2026-01-30 07:25:09,200 - services.pptx_service - INFO -    Title: Test Standard
+2026-01-30 07:25:09,202 - services.pptx_service - INFO - 🔧 Original URL: https://nonexistent.example.com/image.jpg
+2026-01-30 07:25:09,202 - services.pptx_service - INFO - ✅ Sanitized URL: https://nonexistent.example.com/image.jpg
+2026-01-30 07:25:09,202 - services.pptx_service - INFO - ⬇️ Downloading image (attempt 1/3): https://nonexistent.example.com/image.jpg...
+2026-01-30 07:25:09,204 - services.pptx_service - ERROR - ❌ Download error (attempt 1/3): HTTPSConnectionPool(host='nonexistent.example.com', port=443): Max retries exceeded with url: /image.jpg (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7efc3912ff20>: Failed to resolve 'nonexistent.example.com' ([Errno -5] No address associated with hostname)"))
+2026-01-30 07:25:09,204 - services.pptx_service - INFO - ⬇️ Downloading image (attempt 2/3): https://nonexistent.example.com/image.jpg...
+2026-01-30 07:25:09,205 - services.pptx_service - ERROR - ❌ Download error (attempt 2/3): HTTPSConnectionPool(host='nonexistent.example.com', port=443): Max retries exceeded with url: /image.jpg (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7efc3912ede0>: Failed to resolve 'nonexistent.example.com' ([Errno -5] No address associated with hostname)"))
+2026-01-30 07:25:09,205 - services.pptx_service - INFO - ⬇️ Downloading image (attempt 3/3): https://nonexistent.example.com/image.jpg...
+2026-01-30 07:25:09,206 - services.pptx_service - ERROR - ❌ Download error (attempt 3/3): HTTPSConnectionPool(host='nonexistent.example.com', port=443): Max retries exceeded with url: /image.jpg (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7efc3912e690>: Failed to resolve 'nonexistent.example.com' ([Errno -5] No address associated with hostname)"))
+2026-01-30 07:25:09,207 - services.pptx_service - ERROR - ❌ Failed to download image after 3 attempts: https://nonexistent.example.com/image.jpg...
+2026-01-30 07:25:09,207 - services.pptx_service - INFO -    ✅ Slide 1 created successfully
+2026-01-30 07:25:09,212 - services.pptx_service - INFO - ================================================================================
+2026-01-30 07:25:09,212 - services.pptx_service - INFO - ✅ PRESENTATION GENERATION COMPLETED
+2026-01-30 07:25:09,212 - services.pptx_service - INFO - ================================================================================
+
+2026-01-30 07:25:09,212 - services.pptx_service - INFO - 🚀 PPTXService initialized

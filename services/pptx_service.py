@@ -16,6 +16,7 @@ Features:
 
 import io
 import os
+import re
 import logging
 import requests
 import urllib3
@@ -35,6 +36,7 @@ from pptx.enum.dml import MSO_THEME_COLOR, MSO_LINE
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION, XL_LABEL_POSITION
 from pptx.oxml.xmlchemy import OxmlElement
+from PIL import Image
 
 # Disable SSL warnings for development
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -292,11 +294,12 @@ class ImageHandler:
                     # Read image data
                     image_data = response.content
                     
-                    # Verify image is valid
+                    # Verify image is valid using a separate BytesIO to avoid corruption
                     try:
-                        from PIL import Image
                         img = Image.open(BytesIO(image_data))
                         img.verify()
+                        # Reopen to get format and size after verify()
+                        img = Image.open(BytesIO(image_data))
                         logger.info(f"✅ Image verified: {img.format} {img.size}")
                     except Exception as e:
                         logger.warning(f"⚠️ Image verification failed: {e}")
@@ -677,7 +680,6 @@ class PPTXService:
             return ""
         
         # Remove HTML tags if any
-        import re
         content = re.sub(r'<[^>]+>', '', content)
         
         # Convert markdown to plain text with bullets
@@ -742,7 +744,8 @@ class PPTXService:
                             image_loaded = False
                             # Remove the failed shape
                             slide.shapes._spTree.remove(last_shape._element)
-                    except:
+                    except Exception as e:
+                        logger.warning(f"   ⚠️ Image verification failed: {e}")
                         image_loaded = False
                         
                 except Exception as e:
