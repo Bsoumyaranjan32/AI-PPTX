@@ -53,30 +53,17 @@ print("="*80 + "\n")
 try:
     from app import create_app
     
-    # 👇 STEP 1: Import Blueprint
-    from app.routes.presentations import presentations_bp
-    
     print("🚀 Creating Flask application...")
     app = create_app()
     
-    # 👇 STEP 2: Register Blueprint (Yeh fix karega 404 error)
-    # Check karte hain agar pehle se registered nahi hai toh register karein
-    if 'presentations' not in app.blueprints:
-        app.register_blueprint(presentations_bp, url_prefix='/api/presentations')
-        print("✅ Presentations Blueprint Registered manually in run.py")
-    else:
-        print("ℹ️ Presentations Blueprint already registered")
-
     print("✅ Flask app created successfully\n")
     
 except ImportError as e:
     print(f"❌ Import error: {e}")
-    print("\n💡 Make sure you have these folders:")
-    print("   - app/")
+    print("\n💡 Make sure you have:")
+    print("   - app/ directory")
     print("   - app/__init__.py")
-    print("   - app/routes/")
-    print("   - app/models/")
-    print("   - app/services/")
+    print("   - All required dependencies installed")
     sys.exit(1)
 
 except Exception as e:

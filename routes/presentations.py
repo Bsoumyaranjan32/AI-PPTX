@@ -2,7 +2,7 @@
 Presentation Routes - List, Generate, Delete, Export, View, Update
 Complete API for managing presentations
 Author: GuptaSigma
-Updated: 2026-01-08 (Theme & Text Amount Support - FINAL)
+Updated: 2026-01-30
 """
 
 from flask import Blueprint, request, jsonify, send_file
@@ -11,14 +11,14 @@ import datetime
 import io
 import traceback
 
-from app. models.database import execute_query
-from app.services.pptx_service import PPTXService
+from models.database import execute_query
+from services.pptx_service import PPTXService
 
 # ============================================================
 # PDF Service Import (Optional - if you have it)
 # ============================================================
 try:
-    from app.services. pdf_service import PDFService
+    from services.pdf_service import PDFService
     print("✅ PDF Service imported")
 except Exception as e:
     PDFService = None
@@ -28,7 +28,7 @@ except Exception as e:
 # AI Service Import (Safe)
 # ============================================================
 try: 
-    from app.services.ai_service import ai_service
+    from services.ai_service import ai_service
     print("✅ AI Service imported in presentations routes")
 except Exception as e: 
     ai_service = None

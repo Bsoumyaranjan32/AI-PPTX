@@ -1,7 +1,7 @@
 """
 Authentication Routes - Signup, Login, JWT
 Author: GuptaSigma
-Date: 2025-11-23
+Date: 2026-01-30
 """
 
 from flask import Blueprint, request, jsonify
@@ -9,7 +9,7 @@ import bcrypt
 import jwt
 import datetime
 import os
-from app.models.database import execute_query
+from models.database import execute_query
 
 auth_bp = Blueprint('auth', __name__)
 
