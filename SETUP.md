@@ -2,7 +2,7 @@
 
 This guide provides step-by-step instructions with exact git commands to run the Gamma AI project on your local machine.
 
-**🇮🇳 हिंदी में पढ़ें:** [SETUP-HI.md](SETUP-HI.md)
+**🇮🇳 हिंदी में पढ़ें:** [SETUP-HI.md](SETUP-HI.md) | **⚡ Need just the commands?** [Visual Quick Reference](docs/VISUAL-SETUP-GUIDE.md)
 
 ---
 
