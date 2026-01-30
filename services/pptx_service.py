@@ -722,7 +722,7 @@ class PPTXService:
         img_url = data.get('image')
         image_loaded = False
         
-        # Attempt to load background image
+        # Attempt to load background image - ADD IMAGE FIRST AS BACKGROUND LAYER
         if img_url:
             image_data = self.image_handler.download_image(img_url)
             if image_data:
@@ -753,7 +753,7 @@ class PPTXService:
         
         # Apply overlay or fallback design
         if image_loaded:
-            # Dark overlay on image
+            # ADD DARK OVERLAY ON TOP OF IMAGE (40-50% transparency for readability)
             overlay = slide.shapes.add_shape(
                 MSO_SHAPE.RECTANGLE,
                 0, 0,
@@ -762,8 +762,9 @@ class PPTXService:
             )
             overlay.fill.solid()
             overlay.fill.fore_color.rgb = RGBColor(0, 0, 0)
-            overlay.fill.transparency = 0.4
+            overlay.fill.transparency = 0.45  # 45% transparency for optimal readability
             overlay.line.fill.background()
+            # TEXT MUST BE WHITE for readability on dark overlay
             text_color = RGBColor(255, 255, 255)
         else:
             # Fallback: Theme background with decorative circles
@@ -810,7 +811,8 @@ class PPTXService:
             
             text_color = theme['text']
         
-        # Title
+        # ADD TEXT SHAPES LAST (on top layer for proper z-index)
+        # Title - 48pt bold white (centered)
         title_box = slide.shapes.add_textbox(
             Inches(1), Inches(2.5),
             Inches(11.33), Inches(2)
@@ -820,12 +822,12 @@ class PPTXService:
         
         title_paragraph = title_frame.paragraphs[0]
         title_paragraph.text = data.get('title', '')
-        title_paragraph.font.size = self.config.FONT_SIZE_TITLE
+        title_paragraph.font.size = self.config.FONT_SIZE_TITLE  # 48pt
         title_paragraph.font.bold = True
         title_paragraph.font.color.rgb = text_color
         title_paragraph.alignment = PP_ALIGN.CENTER
         
-        # Subtitle/Content
+        # Body Content - 18pt for better readability (centered)
         if data.get('content'):
             subtitle_box = slide.shapes.add_textbox(
                 Inches(2), Inches(4.5),
@@ -836,7 +838,7 @@ class PPTXService:
             
             subtitle_paragraph = subtitle_frame.paragraphs[0]
             subtitle_paragraph.text = data.get('content', '')
-            subtitle_paragraph.font.size = self.config.FONT_SIZE_SUBHEADING
+            subtitle_paragraph.font.size = Pt(18)  # 18pt for hero slide body text
             subtitle_paragraph.font.color.rgb = text_color
             subtitle_paragraph.alignment = PP_ALIGN.CENTER
     
@@ -893,52 +895,81 @@ class PPTXService:
     # LAYOUT 3: GRID CARDS SLIDE
     # ==========================================
     def _create_grid_cards_slide(self, data: Dict, theme: Dict):
-        """Create 2x2 grid matching web preview exactly"""
+        """Create 3-column horizontal grid matching web preview exactly"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
-        self._set_background(slide, theme)
-        self._add_title(slide, data.get('title', ''), theme)
+        
+        # Apply dark navy background for importance/grid slides
+        background = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE,
+            0, 0,
+            self.config.SLIDE_WIDTH,
+            self.config.SLIDE_HEIGHT
+        )
+        background.fill.solid()
+        background.fill.fore_color.rgb = RGBColor(26, 32, 56)  # Dark navy background
+        background.line.fill.background()
+        
+        # Send background to back
+        slide.shapes._spTree.remove(background._element)
+        slide.shapes._spTree.insert(2, background._element)
+        
+        # Add title with white text for dark background
+        title_box = slide.shapes.add_textbox(
+            self.config.MARGIN_LEFT,
+            Inches(0.3),
+            self.config.SLIDE_WIDTH - self.config.MARGIN_LEFT - self.config.MARGIN_RIGHT,
+            Inches(1)
+        )
+        title_frame = title_box.text_frame
+        title_frame.word_wrap = True
+        title_paragraph = title_frame.paragraphs[0]
+        title_paragraph.text = data.get('title', '')
+        title_paragraph.font.size = self.config.FONT_SIZE_HEADING
+        title_paragraph.font.bold = True
+        title_paragraph.font.color.rgb = RGBColor(255, 255, 255)  # White text on dark background
         
         # Parse content
         content = data.get('content', '')
         items = [line.strip().replace('*', '•').replace('#', '') 
                  for line in content.split('\n') if line.strip()]
         
-        # Calculate grid positions (2x2 layout)
-        card_width = Inches(5.8)
-        card_height = Inches(2.0)
-        gap = Inches(0.4)
-        start_x = Inches(0.6)
-        start_y = Inches(2.2)
+        # 3-COLUMN HORIZONTAL LAYOUT (as per requirements)
+        card_width = Inches(3.8)   # Each card width
+        card_height = Inches(2.2)  # Card height
+        gap = Inches(0.4)          # Gap between cards
+        start_x = Inches(0.6)      # Starting X position
+        start_y = Inches(2.5)      # Starting Y position
         
+        # Calculate positions for 3 cards horizontally
         positions = [
-            (start_x, start_y),  # Top-left
-            (start_x + card_width + gap, start_y),  # Top-right
-            (start_x, start_y + card_height + gap),  # Bottom-left
-            (start_x + card_width + gap, start_y + card_height + gap)  # Bottom-right
+            (start_x, start_y),                              # Card 01 (left)
+            (start_x + card_width + gap, start_y),           # Card 02 (center)
+            (start_x + 2 * (card_width + gap), start_y)      # Card 03 (right)
         ]
         
-        # Create cards with exact positioning
-        for idx, item in enumerate(items[:4]):  # Max 4 items for 2x2 grid
+        # Create 3 cards with numbered labels (01, 02, 03)
+        for idx, item in enumerate(items[:3]):  # Max 3 items for 3-column layout
             if idx >= len(positions):
                 break
                 
             x, y = positions[idx]
+            # Create card with number (01, 02, 03)
             self._create_content_card(
                 slide, x, y, card_width, card_height,
                 [item], theme, f"{idx+1:02d}"
             )
     
     def _create_content_card(self, slide, x, y, width, height, items, theme, number):
-        """Helper to create a numbered content card"""
-        # Card background
+        """Helper to create a numbered content card with rounded corners and borders"""
+        # Card background with rounded corners and light border
         card = ShapeHelper.add_rounded_rectangle(
             slide, x, y, width, height,
             theme['card'],
-            theme['accent'],
-            Pt(2)
+            RGBColor(200, 200, 220),  # Light border color
+            Pt(1.5)  # Border width
         )
         
-        # Number badge
+        # Number badge (01, 02, 03)
         ShapeHelper.add_badge(
             slide,
             x + Inches(0.2), y + Inches(0.2),
@@ -948,7 +979,7 @@ class PPTXService:
             Inches(0.6)
         )
         
-        # Content
+        # Content text
         text_box = slide.shapes.add_textbox(
             x + Inches(0.3),
             y + Inches(1),
@@ -972,7 +1003,7 @@ class PPTXService:
     # LAYOUT 4: ROADMAP SLIDE
     # ==========================================
     def _create_roadmap_slide(self, data: Dict, theme: Dict):
-        """Create horizontal roadmap matching web layout"""
+        """Create VERTICAL roadmap/timeline matching web layout"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self._set_background(slide, theme)
         self._add_title(slide, data.get('title', ''), theme)
@@ -989,66 +1020,71 @@ class PPTXService:
         items = items[:6]
         num_items = len(items)
         
-        # Calculate positions (distributed evenly)
-        card_width = Inches(2.0)
-        card_height = Inches(2.8)
-        total_content_width = Inches(12)
-        spacing = (total_content_width - (card_width * num_items)) / (num_items - 1) if num_items > 1 else 0
-        start_x = Inches(0.665)
-        y_line = Inches(3.0)
-        y_card = Inches(3.5)
+        # VERTICAL TIMELINE LAYOUT SETTINGS
+        circle_diameter = Inches(0.6)       # Circle diameter
+        circle_x = Inches(1.5)              # Fixed X position for all circles (left side)
+        start_y = Inches(2.2)               # Starting Y position
+        vertical_gap = Inches(1.0)          # Vertical spacing between circles
+        line_thickness = Pt(4)              # Connecting line thickness (0.1" ≈ 7-8pt, using 4pt for visibility)
+        text_box_x = Inches(2.3)            # Text box X position (right of circles)
+        text_box_width = Inches(9.0)        # Text box width
         
-        # Draw timeline
+        # DRAW VERTICAL CONNECTING LINE FIRST (behind circles)
         if num_items > 1:
+            # Calculate line start and end Y positions
+            line_start_y = start_y + (circle_diameter / 2)  # Center of first circle
+            line_end_y = start_y + ((num_items - 1) * vertical_gap) + (circle_diameter / 2)  # Center of last circle
+            
+            # Draw vertical line connecting all circles
             ShapeHelper.add_separator_line(
                 slide,
-                start_x + card_width/2, y_line,
-                start_x + total_content_width - card_width/2, y_line,
-                theme['accent'], Pt(4)
+                circle_x + (circle_diameter / 2), line_start_y,  # Start at center of first circle
+                circle_x + (circle_diameter / 2), line_end_y,    # End at center of last circle
+                theme['accent'],  # Purple/blue color
+                line_thickness
             )
         
-        # Create roadmap items
+        # CREATE CIRCLES AND TEXT FOR EACH ROADMAP ITEM
         for i, item in enumerate(items):
-            x = start_x + (i * (card_width + spacing))
+            # Calculate Y position for this circle
+            y = start_y + (i * vertical_gap)
             
-            # Circle node
-            circle_x = x + (card_width - Inches(0.7))/2
-            ShapeHelper.add_circle(
-                slide, circle_x, y_line - Inches(0.35),
-                Inches(0.7), theme['accent']
+            # Circle node with solid fill
+            circle = ShapeHelper.add_circle(
+                slide, 
+                circle_x, y,
+                circle_diameter, 
+                theme['accent'],  # Purple/blue solid fill
+                transparency=0.0,
+                border=False
             )
             
-            # Number
+            # White number text inside circle (1-6)
             num_box = slide.shapes.add_textbox(
-                circle_x, y_line - Inches(0.35),
-                Inches(0.7), Inches(0.7)
+                circle_x, y,
+                circle_diameter, circle_diameter
             )
             num_frame = num_box.text_frame
             num_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             num_para = num_frame.paragraphs[0]
             num_para.text = str(i + 1)
-            num_para.font.size = Pt(18)
+            num_para.font.size = Pt(20)
             num_para.font.bold = True
-            num_para.font.color.rgb = theme['bg']
+            num_para.font.color.rgb = RGBColor(255, 255, 255)  # White number
             num_para.alignment = PP_ALIGN.CENTER
             
-            # Content card
-            card = ShapeHelper.add_rounded_rectangle(
-                slide, x, y_card,
-                card_width, card_height,
-                theme['card'], theme['border'], Pt(2)
+            # Text content box aligned with circle
+            text_box = slide.shapes.add_textbox(
+                text_box_x, y,
+                text_box_width, circle_diameter
             )
-            
-            text_frame = card.text_frame
+            text_frame = text_box.text_frame
             text_frame.word_wrap = True
-            text_frame.margin_left = Inches(0.15)
-            text_frame.margin_right = Inches(0.15)
-            text_frame.margin_top = Inches(0.2)
-            text_frame.margin_bottom = Inches(0.2)
+            text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             text_frame.text = item
             
             for para in text_frame.paragraphs:
-                para.font.size = Pt(11)
+                para.font.size = Pt(14)
                 para.font.color.rgb = theme['text']
                 para.space_after = Pt(4)
     
@@ -1410,16 +1446,17 @@ class PPTXService:
         has_image = bool(img_url)
         
         # Adjust text box based on image presence
+        # When image present: text on left (6.0"), image on right (5.0")
         if has_image:
-            text_width = Inches(6.0)
-            image_x = Inches(6.5)
-            image_width = Inches(6.3)
+            text_width = Inches(6.0)  # Left side text box width
+            image_x = Inches(6.5)     # Right side image X position
+            image_width = Inches(5.0)  # Adjusted image width for proper spacing
         else:
-            text_width = Inches(12.3)
+            text_width = Inches(12.3)  # Full width when no image
         
-        # Text content
+        # Text content - both text and image start at same Y position (1.8)
         text_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(1.8),
+            Inches(0.5), Inches(1.8),  # X=0.5", Y=1.8"
             text_width, Inches(5.2)
         )
         
@@ -1433,14 +1470,14 @@ class PPTXService:
             paragraph.space_after = Pt(12)
             paragraph.line_spacing = 1.2
         
-        # Image (if present)
+        # Image (if present) - aligned at same Y position as text
         if has_image:
             image_data = self.image_handler.download_image(img_url)
             if image_data:
                 try:
                     slide.shapes.add_picture(
                         image_data,
-                        image_x, Inches(1.8),
+                        image_x, Inches(1.8),  # Same Y position as text for alignment
                         width=image_width
                     )
                     logger.info("   🖼️ Standard image placed")
