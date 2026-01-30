@@ -57,8 +57,8 @@ This document summarizes the comprehensive cleanup and optimization performed on
 
 #### Updated `requirements.txt`:
 - Added `google-generativeai==0.3.2`
-- Added `cryptography==41.0.7`
-- Added `gunicorn==21.2.0`
+- Added `cryptography==42.0.4` (patched version - fixed NULL pointer dereference and Bleichenbacher timing oracle vulnerabilities)
+- Added `gunicorn==22.0.0` (patched version - fixed HTTP Request/Response Smuggling vulnerabilities)
 - Added comments explaining each dependency
 - Organized by category (Web Framework, Database, Security, etc.)
 
