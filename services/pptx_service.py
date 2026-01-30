@@ -827,7 +827,7 @@ class PPTXService:
         title_paragraph.font.color.rgb = text_color
         title_paragraph.alignment = PP_ALIGN.CENTER
         
-        # Body Content - 16pt for better readability (centered with slight shadow effect)
+        # Body Content - 16pt for better readability (centered)
         if data.get('content'):
             subtitle_box = slide.shapes.add_textbox(
                 Inches(1.0), Inches(2.0),
@@ -936,7 +936,7 @@ class PPTXService:
         
         # Parse content
         content = data.get('content', '')
-        items = [line.strip().replace('*', '').replace('#', '').strip()
+        items = [line.strip().replace('*', '').replace('#', '')
                  for line in content.split('\n') if line.strip()]
         
         # 3-COLUMN HORIZONTAL LAYOUT with proper spacing
@@ -1492,6 +1492,8 @@ class PPTXService:
             if image_data:
                 try:
                     # Add image to LEFT side
+                    # Note: Both width and height are specified to ensure consistent layout
+                    # across slides, even if it means slight aspect ratio adjustment
                     slide.shapes.add_picture(
                         image_data,
                         Inches(0.5),   # X position - left side
@@ -1538,7 +1540,7 @@ class PPTXService:
                 text_frame.add_paragraph()
             
             para = text_frame.paragraphs[idx]
-            para.text = line.replace('*', '•').replace('#', '')
+            para.text = line  # Content already preprocessed, no need for additional replacements
             para.font.size = Pt(14)
             para.font.color.rgb = theme.get('text', RGBColor(51, 51, 51))
             para.space_after = Pt(10)
