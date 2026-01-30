@@ -8,7 +8,7 @@
 
 **Create stunning presentations powered by Google Gemini 2.5 Flash and DeepSeek AI**
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Installation](#-installation) • [Configuration](#️-configuration) • [Usage](#-usage) • [API](#-api-endpoints) • [Troubleshooting](#-troubleshooting)
+[🚀 Setup Guide](SETUP.md) • [Features](#-features) • [Quick Start](#-quick-start) • [Installation](#-installation) • [Configuration](#️-configuration) • [Usage](#-usage) • [API](#-api-endpoints) • [Troubleshooting](#-troubleshooting)
 
 </div>
 
@@ -34,6 +34,10 @@ Gamma AI is a powerful web application that uses artificial intelligence to gene
 
 ## 🚀 Quick Start
 
+> **👉 New to the project? Check out our [Detailed Setup Guide](SETUP.md) with step-by-step instructions and troubleshooting!**
+> 
+> **🇮🇳 हिंदी में सेटअप गाइड:** [SETUP-HI.md](SETUP-HI.md)
+
 ```bash
 # Clone the repository
 git clone https://github.com/Bsoumyaranjan32/AI-PPTX.git
@@ -58,6 +62,8 @@ python run.py
 ```
 
 Visit **http://localhost:5000** in your browser!
+
+**Need detailed instructions?** See [SETUP.md](SETUP.md) for comprehensive setup guide with git commands and troubleshooting.
 
 ---
 
