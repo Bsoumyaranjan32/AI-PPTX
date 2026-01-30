@@ -65,12 +65,12 @@ class PPTXConfig:
     MARGIN_RIGHT = Inches(0.5)
     
     # Font Sizes
-    FONT_SIZE_TITLE = Pt(44)
-    FONT_SIZE_HEADING = Pt(32)
-    FONT_SIZE_SUBHEADING = Pt(24)
-    FONT_SIZE_BODY = Pt(18)
-    FONT_SIZE_SMALL = Pt(14)
-    FONT_SIZE_CAPTION = Pt(12)
+    FONT_SIZE_TITLE = Pt(48)      # Increased for better visibility
+    FONT_SIZE_HEADING = Pt(36)    # Matches web h2
+    FONT_SIZE_SUBHEADING = Pt(26) # Matches web h3
+    FONT_SIZE_BODY = Pt(16)       # Matches web body
+    FONT_SIZE_SMALL = Pt(13)      # Matches web small
+    FONT_SIZE_CAPTION = Pt(11)    # Matches web caption
     
     # Image Settings
     IMAGE_TIMEOUT = 15
@@ -217,17 +217,26 @@ class ImageHandler:
             return ""
         
         try:
-            # Handle spaces in URL
-            if " " in url:
-                parts = url.split("prompt/")
-                if len(parts) > 1:
-                    url = parts[0] + "prompt/" + quote(parts[1])
+            logger.info(f"🔧 Original URL: {url}")
+            
+            # Handle spaces and special chars in URL path
+            if " " in url or any(c in url for c in ['&', '=', '?']):
+                parsed = urlparse(url)
+                
+                # If prompt parameter exists, encode only that part
+                if "prompt/" in url:
+                    base, prompt_part = url.rsplit("prompt/", 1)
+                    encoded_prompt = quote(prompt_part, safe='')
+                    url = f"{base}prompt/{encoded_prompt}"
                 else:
+                    # Full URL encoding (preserve scheme and domain)
                     url = quote(url, safe=':/?#[]@!$&\'()*+,;=')
             
+            logger.info(f"✅ Sanitized URL: {url}")
             return url
+            
         except Exception as e:
-            logger.error(f"URL sanitization error: {e}")
+            logger.error(f"❌ URL sanitization failed: {e}")
             return url
     
     def _get_cache_key(self, url: str) -> str:
@@ -283,7 +292,17 @@ class ImageHandler:
                     # Read image data
                     image_data = response.content
                     
-                    # Cache image
+                    # Verify image is valid
+                    try:
+                        from PIL import Image
+                        img = Image.open(BytesIO(image_data))
+                        img.verify()
+                        logger.info(f"✅ Image verified: {img.format} {img.size}")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Image verification failed: {e}")
+                        return None
+                    
+                    # Cache and return
                     if self.config.IMAGE_CACHE_ENABLED:
                         self.cache[cache_key] = image_data
                     
@@ -652,6 +671,45 @@ class PPTXService:
             # Create error slide as fallback
             self._create_error_slide(slide_data, str(e))
     
+    def _preprocess_content(self, content: str) -> str:
+        """Clean and format content for PPTX"""
+        if not content:
+            return ""
+        
+        # Remove HTML tags if any
+        import re
+        content = re.sub(r'<[^>]+>', '', content)
+        
+        # Convert markdown to plain text with bullets
+        content = content.replace('**', '')
+        content = content.replace('*', '•')
+        content = content.replace('- ', '• ')
+        
+        # Fix line breaks
+        content = content.replace('\r\n', '\n')
+        content = content.replace('\r', '\n')
+        
+        # Remove excessive whitespace
+        lines = [line.strip() for line in content.split('\n') if line.strip()]
+        content = '\n'.join(lines)
+        
+        return content
+    
+    def _add_debug_borders(self, slide, theme):
+        """Add border guides for debugging (only in dev mode)"""
+        if os.getenv('PPTX_DEBUG') == 'true':
+            # Add thin border around content areas
+            for x, y, w, h in [
+                (Inches(0.5), Inches(1.5), Inches(12.3), Inches(5.5))
+            ]:
+                border = slide.shapes.add_shape(
+                    MSO_SHAPE.RECTANGLE, x, y, w, h
+                )
+                border.fill.background()
+                border.line.color.rgb = RGBColor(255, 0, 0)
+                border.line.width = Pt(1)
+                border.line.dash_style = 2  # Dashed
+    
     # ==========================================
     # LAYOUT 1: HERO / TITLE SLIDE
     # ==========================================
@@ -675,6 +733,18 @@ class PPTXService:
                     )
                     image_loaded = True
                     logger.info("   🖼️ Hero image loaded")
+                    
+                    # Verify that image actually rendered
+                    try:
+                        last_shape = slide.shapes[-1]
+                        if not hasattr(last_shape, 'image'):
+                            logger.warning("   ⚠️ Image shape invalid, using fallback")
+                            image_loaded = False
+                            # Remove the failed shape
+                            slide.shapes._spTree.remove(last_shape._element)
+                    except:
+                        image_loaded = False
+                        
                 except Exception as e:
                     logger.warning(f"   ⚠️ Failed to place hero image: {e}")
         
@@ -695,6 +765,18 @@ class PPTXService:
         else:
             # Fallback: Theme background with decorative circles
             self._set_background(slide, theme)
+            
+            # Add subtle gradient background for better readability
+            gradient_overlay = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                0, Inches(2),
+                self.config.SLIDE_WIDTH,
+                Inches(4)
+            )
+            gradient_overlay.fill.solid()
+            gradient_overlay.fill.fore_color.rgb = theme['accent']
+            gradient_overlay.fill.transparency = 0.85
+            gradient_overlay.line.fill.background()
             
             # Large decorative circle (top-left)
             ShapeHelper.add_circle(
@@ -808,39 +890,39 @@ class PPTXService:
     # LAYOUT 3: GRID CARDS SLIDE
     # ==========================================
     def _create_grid_cards_slide(self, data: Dict, theme: Dict):
-        """Create 2x2 grid of content cards"""
+        """Create 2x2 grid matching web preview exactly"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self._set_background(slide, theme)
         self._add_title(slide, data.get('title', ''), theme)
         
-        # Parse content into items
+        # Parse content
         content = data.get('content', '')
-        items = [line.strip() for line in content.split('\n') if line.strip()]
+        items = [line.strip().replace('*', '•').replace('#', '') 
+                 for line in content.split('\n') if line.strip()]
         
-        # Split into two cards
-        mid = len(items) // 2
-        left_items = items[:mid] if mid > 0 else items
-        right_items = items[mid:] if mid > 0 else []
+        # Calculate grid positions (2x2 layout)
+        card_width = Inches(5.8)
+        card_height = Inches(2.0)
+        gap = Inches(0.4)
+        start_x = Inches(0.6)
+        start_y = Inches(2.2)
         
-        # Left Card
-        self._create_content_card(
-            slide,
-            Inches(0.5), Inches(2.0),
-            Inches(6), Inches(4.5),
-            left_items,
-            theme,
-            "01"
-        )
+        positions = [
+            (start_x, start_y),  # Top-left
+            (start_x + card_width + gap, start_y),  # Top-right
+            (start_x, start_y + card_height + gap),  # Bottom-left
+            (start_x + card_width + gap, start_y + card_height + gap)  # Bottom-right
+        ]
         
-        # Right Card
-        if right_items:
+        # Create cards with exact positioning
+        for idx, item in enumerate(items[:4]):  # Max 4 items for 2x2 grid
+            if idx >= len(positions):
+                break
+                
+            x, y = positions[idx]
             self._create_content_card(
-                slide,
-                Inches(6.8), Inches(2.0),
-                Inches(6), Inches(4.5),
-                right_items,
-                theme,
-                "02"
+                slide, x, y, card_width, card_height,
+                [item], theme, f"{idx+1:02d}"
             )
     
     def _create_content_card(self, slide, x, y, width, height, items, theme, number):
@@ -887,87 +969,85 @@ class PPTXService:
     # LAYOUT 4: ROADMAP SLIDE
     # ==========================================
     def _create_roadmap_slide(self, data: Dict, theme: Dict):
-        """Create horizontal roadmap/timeline"""
+        """Create horizontal roadmap matching web layout"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self._set_background(slide, theme)
         self._add_title(slide, data.get('title', ''), theme)
         
-        # Parse roadmap items
+        # Parse items
         content = data.get('content', '')
-        items = [line.strip() for line in content.split('\n') if line.strip()][:4]
+        items = [line.strip().replace('*', '').replace('#', '') 
+                 for line in content.split('\n') if line.strip()]
         
         if not items:
             return
         
-        # Calculate positions
+        # Limit to 6 items max (matches web)
+        items = items[:6]
         num_items = len(items)
-        card_width = Inches(2.5)
-        spacing = Inches(0.5)
-        total_width = (card_width * num_items) + (spacing * (num_items - 1))
-        start_x = (self.config.SLIDE_WIDTH - total_width) / 2
-        y = Inches(2.5)
         
-        # Draw connecting line
+        # Calculate positions (distributed evenly)
+        card_width = Inches(2.0)
+        card_height = Inches(2.8)
+        total_content_width = Inches(12)
+        spacing = (total_content_width - (card_width * num_items)) / (num_items - 1) if num_items > 1 else 0
+        start_x = Inches(0.665)
+        y_line = Inches(3.0)
+        y_card = Inches(3.5)
+        
+        # Draw timeline
         if num_items > 1:
-            line_y = y + Inches(0.3)
             ShapeHelper.add_separator_line(
                 slide,
-                start_x + Inches(0.3), line_y,
-                start_x + total_width - Inches(0.3), line_y,
-                theme['accent'],
-                Pt(3)
+                start_x + card_width/2, y_line,
+                start_x + total_content_width - card_width/2, y_line,
+                theme['accent'], Pt(4)
             )
         
-        # Create roadmap cards
+        # Create roadmap items
         for i, item in enumerate(items):
             x = start_x + (i * (card_width + spacing))
             
-            # Circle marker
+            # Circle node
+            circle_x = x + (card_width - Inches(0.7))/2
             ShapeHelper.add_circle(
-                slide,
-                x + Inches(1), y,
-                Inches(0.6),
-                theme['accent'],
-                transparency=0.0,
-                border=False
+                slide, circle_x, y_line - Inches(0.35),
+                Inches(0.7), theme['accent']
             )
             
-            # Number in circle
+            # Number
             num_box = slide.shapes.add_textbox(
-                x + Inches(1), y,
-                Inches(0.6), Inches(0.6)
+                circle_x, y_line - Inches(0.35),
+                Inches(0.7), Inches(0.7)
             )
             num_frame = num_box.text_frame
             num_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             num_para = num_frame.paragraphs[0]
             num_para.text = str(i + 1)
-            num_para.font.size = Pt(16)
+            num_para.font.size = Pt(18)
             num_para.font.bold = True
             num_para.font.color.rgb = theme['bg']
             num_para.alignment = PP_ALIGN.CENTER
             
             # Content card
             card = ShapeHelper.add_rounded_rectangle(
-                slide,
-                x, y + Inches(1),
-                card_width, Inches(3),
-                theme['card'],
-                theme['border'],
-                Pt(1)
+                slide, x, y_card,
+                card_width, card_height,
+                theme['card'], theme['border'], Pt(2)
             )
             
-            card_text = card.text_frame
-            card_text.word_wrap = True
-            card_text.margin_left = Inches(0.15)
-            card_text.margin_right = Inches(0.15)
-            card_text.margin_top = Inches(0.2)
+            text_frame = card.text_frame
+            text_frame.word_wrap = True
+            text_frame.margin_left = Inches(0.15)
+            text_frame.margin_right = Inches(0.15)
+            text_frame.margin_top = Inches(0.2)
+            text_frame.margin_bottom = Inches(0.2)
+            text_frame.text = item
             
-            card_text.text = item.replace('*', '').replace('#', '').strip()
-            
-            for para in card_text.paragraphs:
-                para.font.size = Pt(12)
+            for para in text_frame.paragraphs:
+                para.font.size = Pt(11)
                 para.font.color.rgb = theme['text']
-                para.space_after = Pt(6)
+                para.space_after = Pt(4)
     
     # ==========================================
     # LAYOUT 5: TIMELINE SLIDE
@@ -1134,7 +1214,7 @@ class PPTXService:
         quote_frame = quote_mark.text_frame
         quote_para = quote_frame.paragraphs[0]
         # FIXED: Added the missing closing quote and actual text
-        quote_para.text = "“"
+        quote_para.text = '"'
         quote_para.font.size = Pt(120)
         quote_para.font.color.rgb = theme['accent']
         quote_para.font.bold = True
@@ -1318,39 +1398,51 @@ class PPTXService:
     # LAYOUT 12: STANDARD SLIDE
     # ==========================================
     def _create_standard_slide(self, data: Dict, theme: Dict):
-        """Create standard content slide with text and optional image"""
+        """Standard slide with balanced text and image"""
         slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self._set_background(slide, theme)
         self._add_title(slide, data.get('title', ''), theme)
         
-        # Text content (left side)
+        img_url = data.get('image')
+        has_image = bool(img_url)
+        
+        # Adjust text box based on image presence
+        if has_image:
+            text_width = Inches(6.0)
+            image_x = Inches(6.5)
+            image_width = Inches(6.3)
+        else:
+            text_width = Inches(12.3)
+        
+        # Text content
         text_box = slide.shapes.add_textbox(
             Inches(0.5), Inches(1.8),
-            Inches(6.5), Inches(5)
+            text_width, Inches(5.2)
         )
         
         text_frame = text_box.text_frame
         text_frame.word_wrap = True
-        text_frame.text = data.get('content', '')
+        text_frame.text = data.get('content', '').replace('*', '•')
         
         for paragraph in text_frame.paragraphs:
             paragraph.font.size = self.config.FONT_SIZE_BODY
             paragraph.font.color.rgb = theme['text']
             paragraph.space_after = Pt(12)
+            paragraph.line_spacing = 1.2
         
-        # Optional image (right side)
-        img_url = data.get('image')
-        if img_url:
+        # Image (if present)
+        if has_image:
             image_data = self.image_handler.download_image(img_url)
             if image_data:
                 try:
                     slide.shapes.add_picture(
                         image_data,
-                        Inches(7.2), Inches(1.8),
-                        width=Inches(5.5)
+                        image_x, Inches(1.8),
+                        width=image_width
                     )
+                    logger.info("   🖼️ Standard image placed")
                 except Exception as e:
-                    logger.warning(f"   ⚠️ Failed to place standard image: {e}")
+                    logger.warning(f"   ⚠️ Image placement failed: {e}")
     
     # ==========================================
     # LAYOUT 13: ERROR SLIDE (Fallback)
