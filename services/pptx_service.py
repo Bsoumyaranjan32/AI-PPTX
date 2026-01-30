@@ -31,7 +31,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
 from pptx.enum.dml import MSO_THEME_COLOR, MSO_LINE
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION, XL_LABEL_POSITION
@@ -389,7 +389,7 @@ class ShapeHelper:
     def add_separator_line(slide, x1, y1, x2, y2, color, width=Pt(2)):
         """Add a separator line"""
         connector = slide.shapes.add_connector(
-            MSO_LINE.STRAIGHT_CONNECTOR,
+            MSO_CONNECTOR.STRAIGHT,
             x1, y1, x2, y2
         )
         connector.line.color.rgb = color
