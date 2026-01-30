@@ -1,6 +1,6 @@
 # 📸 Visual Setup Guide - Screenshots & Quick Reference
 
-This is a companion guide to [SETUP.md](SETUP.md) with visual aids and a condensed command reference.
+This is a companion guide to [../SETUP.md](../SETUP.md) with visual aids and a condensed command reference.
 
 ---
 
@@ -426,10 +426,10 @@ If all checks pass ✅, you're ready to run!
 
 ## 📚 Additional Resources
 
-- **Full Setup Guide:** [SETUP.md](SETUP.md)
-- **Hindi Guide:** [SETUP-HI.md](SETUP-HI.md)
-- **Contributing Guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
-- **Main Documentation:** [README.md](README.md)
+- **Full Setup Guide:** [../SETUP.md](../SETUP.md)
+- **Hindi Guide:** [../SETUP-HI.md](../SETUP-HI.md)
+- **Contributing Guide:** [../CONTRIBUTING.md](../CONTRIBUTING.md)
+- **Main Documentation:** [../README.md](../README.md)
 
 ---
 
@@ -453,4 +453,4 @@ If all checks pass ✅, you're ready to run!
 
 ---
 
-**Need help? Check [SETUP.md](SETUP.md) for detailed troubleshooting or open an issue on GitHub!**
+**Need help? Check [../SETUP.md](../SETUP.md) for detailed troubleshooting or open an issue on GitHub!**
