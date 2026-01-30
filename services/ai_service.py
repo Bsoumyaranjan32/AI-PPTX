@@ -20,27 +20,36 @@ class CloudAIService:
         print("🤖 AI SERVICE - MULTI-MODEL PRODUCTION MODE (v4.4)")
         print("=" * 60)
 
-        # ✅ API KEYS
-        self.gemini_key = os.getenv("GOOGLE_GEMINI_API_KEY", "AIzaSyCkY8uxfVVFZBmJSsHt9KLP-ehZZeKXEpc")
-        self.openrouter_key = "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"
+        # ✅ API KEYS - Load from environment variables only
+        self.gemini_key = os.getenv("GOOGLE_GEMINI_API_KEY")
+        self.openrouter_key = os.getenv("OPENROUTER_API_KEY")
         
         # Google Search (for images)
-        self.google_search_key = "AIzaSyC4q0MZDeqn44BxoGifS85F7gxEvB2fALY"
-        self.google_cx_id = "524c9dc52a1bc4e12"
+        self.google_search_key = os.getenv("GOOGLE_API_KEY")
+        self.google_cx_id = os.getenv("GOOGLE_CX_ID")
+        
+        # Validate critical API keys
+        if not self.gemini_key:
+            print("⚠️  WARNING: GOOGLE_GEMINI_API_KEY not set in environment")
+        if not self.openrouter_key:
+            print("⚠️  WARNING: OPENROUTER_API_KEY not set in environment")
 
-        # ✅ WINDOWS-SAFE PATH
+        # ✅ WINDOWS-SAFE PATH using pathlib
         try:
             current_file = Path(__file__).resolve()
-            project_root = current_file.parent.parent. parent
+            project_root = current_file.parent.parent
             self.static_folder = project_root / "static" / "generated"
             self.static_folder.mkdir(parents=True, exist_ok=True)
-            print(f"📂 Static folder:  {self.static_folder}")
-        except: 
+            print(f"📂 Static folder: {self.static_folder}")
+        except Exception as e:
             self.static_folder = None
-            print(f"⚠️ Static folder unavailable (using external images only)")
+            print(f"⚠️ Static folder unavailable (using external images only): {e}")
 
-        print(f"🔑 Gemini Key: {self.gemini_key[: 20]}...")
-        print(f"🔑 OpenRouter Key:  {self.openrouter_key[:20]}...")
+        # Display API key status (safely)
+        if self.gemini_key:
+            print(f"🔑 Gemini Key: {self.gemini_key[:10]}... (configured)")
+        if self.openrouter_key:
+            print(f"🔑 OpenRouter Key: {self.openrouter_key[:10]}... (configured)")
         print("=" * 60 + "\n")
 
     # ============================================================
